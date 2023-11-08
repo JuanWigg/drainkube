@@ -30,7 +30,6 @@ func checkPdbs() {
 	}
 	fmt.Printf("There are %d PDBs in the Cluster\n", len(pdbs.Items))
 	for _, pdb := range pdbs.Items {
-		fmt.Printf("Getting PDB %s Selector\n", pdb.ObjectMeta.Name)
 		podDisruptionBudgets = append(podDisruptionBudgets, PDB{pdb.ObjectMeta.Name, pdb.Spec.Selector.MatchLabels})
 	}
 

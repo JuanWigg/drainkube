@@ -33,7 +33,6 @@ func GetInstance() *kubernetes.Clientset {
 		lock.Lock()
 		defer lock.Unlock()
 		if clientInstance == nil {
-			fmt.Println("Creating client instance now.")
 			var kubeconfig string
 			flag.Parse()
 			kubeconfig = flag.Lookup("kubeconfig").Value.(flag.Getter).Get().(string)

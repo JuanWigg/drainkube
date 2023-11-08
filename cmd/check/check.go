@@ -25,6 +25,7 @@ affected PodDisruptionBudgets, affected Deployments or affected HPAs`,
 func init() {
 	CheckCmd.AddCommand(podsCmd)
 	CheckCmd.AddCommand(pdbsCmd)
+	CheckCmd.AddCommand(deploymentsCmd)
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
