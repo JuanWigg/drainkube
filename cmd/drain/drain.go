@@ -10,8 +10,14 @@ import (
 )
 
 var (
-	nodeName string
+	nodeName     string
+	affectedPdbs []PDB
+	affectedPods []Pod
 )
+
+func drainNode() {
+	getAffectedPdbs()
+}
 
 var DrainCmd = &cobra.Command{
 	Use:   "drain",
@@ -19,7 +25,7 @@ var DrainCmd = &cobra.Command{
 	Long: `The command drain safely drains a Kubernetes node making sure it respects the
 	PodDisruptionBudgets defined for every pod scheduled and running on the node`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		drainNode()
 	},
 }
 

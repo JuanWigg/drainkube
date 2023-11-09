@@ -4,12 +4,12 @@ Copyright © 2023 Juan Wiggenhauser <jgwiggenhauser@gmail.com>
 package check
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/JuanWigg/drainkube/cmd/kubernetes"
 	"github.com/JuanWigg/drainkube/cmd/util"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	policyv1 "k8s.io/api/policy/v1"
 )
 
 type PDB struct {
@@ -18,17 +18,13 @@ type PDB struct {
 }
 
 var (
+	pdbs                 *policyv1.PodDisruptionBudgetList
 	podDisruptionBudgets []PDB
 )
 
 func checkPdbs() {
 	fmt.Println("Checking PodDisruptionBudgets...")
-	client := util.GetInstance()
-	pdbs, err := client.PolicyV1().PodDisruptionBudgets("").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Printf("There are %d PDBs in the Cluster\n", len(pdbs.Items))
+	pdbs = kubernetes.GetPdbs()
 	for _, pdb := range pdbs.Items {
 		podDisruptionBudgets = append(podDisruptionBudgets, PDB{pdb.ObjectMeta.Name, pdb.Spec.Selector.MatchLabels})
 	}
@@ -38,7 +34,7 @@ func checkPdbs() {
 	}
 
 	fmt.Println("Getting pods in the node...")
-	podList := getPods()
+	podList := kubernetes.GetPods(nodeName)
 
 	fmt.Println("Analyizing pods")
 	for _, pod := range podList.Items {

@@ -4,12 +4,12 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package check
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/JuanWigg/drainkube/cmd/kubernetes"
 	"github.com/JuanWigg/drainkube/cmd/util"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	appsv1 "k8s.io/api/apps/v1"
 )
 
 type Deploy struct {
@@ -18,18 +18,14 @@ type Deploy struct {
 }
 
 var (
+	deployments     *appsv1.DeploymentList
 	deploymentsList []Deploy
 )
 
 func checkDeploys() {
 	fmt.Println("Checking Deployments...")
-	client := util.GetInstance()
-	deploys, err := client.AppsV1().Deployments("").List(context.TODO(), v1.ListOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Printf("There are %d Deployments in the Cluster\n", len(deploys.Items))
-	for _, deploy := range deploys.Items {
+	deployments = kubernetes.GetDeploys()
+	for _, deploy := range deployments.Items {
 		deploymentsList = append(deploymentsList, Deploy{deploy.ObjectMeta.Name, deploy.Spec.Selector.MatchLabels})
 	}
 
@@ -38,7 +34,7 @@ func checkDeploys() {
 	}
 
 	fmt.Println("Getting pods in the node...")
-	podList := getPods()
+	podList := kubernetes.GetPods(nodeName)
 
 	fmt.Println("Analyizing pods")
 	for _, pod := range podList.Items {

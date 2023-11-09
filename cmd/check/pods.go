@@ -4,36 +4,14 @@ Copyright © 2023 Juan Wiggenhauser <jgwiggenhauser@gmail.com>
 package check
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/JuanWigg/drainkube/cmd/util"
+	"github.com/JuanWigg/drainkube/cmd/kubernetes"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func checkPods() {
-	client := util.GetInstance()
-	pods, err := client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{FieldSelector: fmt.Sprintf("spec.nodeName=%s", nodeName)})
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Printf("There are %d pods in the in the node\n", len(pods.Items))
-	for _, pod := range pods.Items {
-		fmt.Println(pod.ObjectMeta.Name)
-	}
-
-}
-
-func getPods() *v1.PodList {
-	client := util.GetInstance()
-	pods, err := client.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{FieldSelector: fmt.Sprintf("spec.nodeName=%s", nodeName)})
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Printf("There are %d pods in the in the node\n", len(pods.Items))
-	return pods
+	kubernetes.GetPods(nodeName)
 }
 
 // podsCmd represents the pods command
