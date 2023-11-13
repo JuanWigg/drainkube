@@ -20,24 +20,15 @@ var (
 
 func drainNode() {
 	// Get affected resources
-	fmt.Println("Getting affected PDBs...")
 	getAffectedPdbs()
-	fmt.Println("The affected PDBs are:")
-	fmt.Println(affectedPdbs)
-	fmt.Println("Getting affected Rollouts...")
 	getAffectedRollouts()
-	fmt.Println("The affected Rollouts are:")
-	fmt.Println(affectedRollouts)
-	fmt.Println("Getting affected Deploys...")
 	getAffectedDeploys()
-	fmt.Println("The affected Deploys are:")
-	fmt.Println(affectedDeploys)
-	fmt.Println("Getting affected HPAs...")
 	getAffectedHpas()
-	fmt.Println("The affected HPAs are:")
-	fmt.Println(affectedHPAs)
 
 	// Start the process
+	fmt.Println("Starting drain process...")
+	cordonNode()
+	disableHPADownscaling()
 }
 
 var DrainCmd = &cobra.Command{

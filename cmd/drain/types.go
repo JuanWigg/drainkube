@@ -22,6 +22,7 @@ type Rollout struct {
 
 type HPA struct {
 	name      string
+	namespace string
 	targetRef string
 	kind      string
 }
