@@ -14,3 +14,14 @@ type Deploy struct {
 	name        string
 	matchLabels map[string]string
 }
+
+type Rollout struct {
+	name        string
+	matchLabels map[string]string
+}
+
+type HPA struct {
+	name      string
+	targetRef string
+	kind      string
+}

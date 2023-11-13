@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
@@ -17,6 +18,7 @@ import (
 var lock = &sync.Mutex{}
 
 var clientInstance *kubernetes.Clientset
+var dynamicInstance dynamic.Interface
 
 func init() {
 	if flag.Lookup("kubeconfig") == nil {
@@ -56,4 +58,34 @@ func GetInstance() *kubernetes.Clientset {
 		fmt.Println("Client instance already created.")
 	}
 	return clientInstance
+}
+
+func GetDynamicInstance() dynamic.Interface {
+	if clientInstance == nil {
+		lock.Lock()
+		defer lock.Unlock()
+		if clientInstance == nil {
+			var kubeconfig string
+			flag.Parse()
+			kubeconfig = flag.Lookup("kubeconfig").Value.(flag.Getter).Get().(string)
+
+			// use the current context in kubeconfig
+			config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			// create the clientset
+			dynamicInstance, err := dynamic.NewForConfig(config)
+			if err != nil {
+				panic(err.Error())
+			}
+			return dynamicInstance
+		} else {
+			fmt.Println("Client instance already created.")
+		}
+	} else {
+		fmt.Println("Client instance already created.")
+	}
+	return dynamicInstance
 }
