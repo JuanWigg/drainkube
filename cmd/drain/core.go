@@ -16,6 +16,7 @@ var (
 )
 
 func getAffectedPdbs() {
+	fmt.Println("Getting affected PDBs...")
 	allPdbs = kubernetes.GetPdbs()
 	allPods = kubernetes.GetPods(nodeName)
 
@@ -28,9 +29,12 @@ func getAffectedPdbs() {
 			}
 		}
 	}
+	fmt.Println("The affected PDBs are:")
+	fmt.Println(affectedPdbs)
 }
 
 func getAffectedDeploys() {
+	fmt.Println("Getting affected Deploys...")
 	allDeploys := kubernetes.GetDeploys()
 
 	for _, deploy := range allDeploys.Items {
@@ -40,9 +44,12 @@ func getAffectedDeploys() {
 			}
 		}
 	}
+	fmt.Println("The affected Deploys are:")
+	fmt.Println(affectedDeploys)
 }
 
 func getAffectedRollouts() {
+	fmt.Println("Getting affected Rollouts...")
 	allRollouts := kubernetes.GetRollouts()
 	allPods = kubernetes.GetPods(nodeName)
 
@@ -58,21 +65,42 @@ func getAffectedRollouts() {
 			}
 		}
 	}
+
+	fmt.Println("The affected Rollouts are:")
+	fmt.Println(affectedRollouts)
 }
 
 func getAffectedHpas() {
+	fmt.Println("Getting affected HPAs...")
 	allHPAs := kubernetes.GetHPAs()
 
 	for _, hpa := range allHPAs.Items {
 		for _, deploy := range affectedDeploys {
 			if deploy.name == hpa.Spec.ScaleTargetRef.Name {
-				affectedHPAs = append(affectedHPAs, HPA{hpa.ObjectMeta.Name, hpa.Spec.ScaleTargetRef.Name, hpa.Spec.ScaleTargetRef.Kind})
+				affectedHPAs = append(affectedHPAs, HPA{hpa.ObjectMeta.Name, hpa.ObjectMeta.Namespace, hpa.Spec.ScaleTargetRef.Name, hpa.Spec.ScaleTargetRef.Kind})
 			}
 		}
 		for _, rollout := range affectedRollouts {
 			if hpa.Spec.ScaleTargetRef.Name == rollout.name {
-				affectedHPAs = append(affectedHPAs, HPA{hpa.ObjectMeta.Name, hpa.Spec.ScaleTargetRef.Name, hpa.Spec.ScaleTargetRef.Kind})
+				affectedHPAs = append(affectedHPAs, HPA{hpa.ObjectMeta.Name, hpa.ObjectMeta.Namespace, hpa.Spec.ScaleTargetRef.Name, hpa.Spec.ScaleTargetRef.Kind})
 			}
 		}
 	}
+	fmt.Println("The affected HPAs are:")
+	fmt.Println(affectedHPAs)
+}
+
+func cordonNode() {
+	fmt.Println("Cordoning node...")
+	kubernetes.CordonNode(nodeName)
+	fmt.Println("Node cordoned successfully")
+}
+
+func disableHPADownscaling() {
+	fmt.Println("Disabling Scale Down in HPAs...")
+	for _, hpa := range affectedHPAs {
+		kubernetes.DisableHPADownscaling(hpa.name, hpa.namespace)
+		fmt.Printf("HPA %s patched.\n", hpa.name)
+	}
+	fmt.Println("HPAs patched successfully")
 }
